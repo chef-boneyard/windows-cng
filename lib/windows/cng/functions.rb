@@ -6,6 +6,8 @@ module Windows
       extend FFI::Library
       ffi_lib :bcrypt
 
+      ## CNG Cryptographic Primitive Functions
+
       attach_function :BCryptCloseAlgorithmProvider,
         [:pointer, :ulong],
         :ulong
@@ -57,11 +59,43 @@ module Windows
         [:pointer, :string, :pointer, :ulong, :pointer, :ulong],
         :ulong
 
-      attach_function, :BCryptHashData, [:pointer, :pointer, :ulong, :ulong], :ulong
+      attach_function :BCryptHashData, [:pointer, :pointer, :ulong, :ulong], :ulong
+
+      attach_function :BCryptImportKey,
+        [:pointer, :pointer, :string, :pointer, :pointer, :ulong, :pointer, :ulong, :ulong],
+        :ulong
+
+      attach_function :BCryptImportKeyPair,
+        [:pointer, :pointer, :string, :pointer, :pointer, :ulong, :ulong],
+        :ulong
 
       attach_function :BCryptOpenAlgorithmProvider,
         [:pointer, :string, :string, :ulong],
         :ulong
+
+      attach_function :BCryptSecretAgreement,
+        [:pointer, :pointer, :pointer, :ulong],
+        :ulong
+
+      attach_function :BCryptSetProperty,
+        [:pointer, :string, :pointer, :ulong, :ulong],
+        :ulong
+
+      attach_function :BCryptSignHash,
+        [:pointer, :pointer, :pointer, :ulong, :pointer, :ulong, :pointer, :ulong],
+        :ulong
+
+      attach_function :BCryptVerifySignature,
+        [:pointer, :pointer, :pointer, :ulong, :pointer, :ulong, :ulong],
+        :ulong
+
+      begin
+        attach_function :BCryptKeyDerivation,
+          [:pointer, :pointer, :pointer, :ulong, :pointer, :ulong],
+          :ulong
+      rescue FFI::NotFoundError
+        # Windows 8 or later
+      end
     end
   end
 end
