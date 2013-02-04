@@ -6,7 +6,9 @@ module Windows
       extend FFI::Library
       ffi_lib :bcrypt
 
-      attach_function :BCryptCloseAlgorithmProvider, [:pointer, :ulong], :ulong
+      attach_function :BCryptCloseAlgorithmProvider,
+        [:pointer, :ulong],
+        :ulong
 
       attach_function :BCryptCreateHash,
         [:pointer, :pointer, :pointer, :ulong, :pointer, :ulong, :ulong],
@@ -16,7 +18,50 @@ module Windows
         [:pointer, :pointer, :ulong, :pointer, :pointer, :ulong, :pointer, :ulong, :ulong, :ulong],
         :ulong
 
-      attach_function :BCryptOpenAlgorithmProvider, [:pointer, :string, :string, :ulong], :ulong
+      attach_function :BCryptDeriveKey,
+        [:pointer, :string, :pointer, :pointer, :ulong, :ulong, :ulong],
+        :ulong
+
+      attach_function :BCryptDestroyHash, [:pointer], :ulong
+      attach_function :BCryptDestroyKey, [:pointer], :ulong
+      attach_function :BCryptDestroySecret, [:pointer], :ulong
+
+      attach_function :BCryptDuplicateHash,
+        [:pointer, :pointer, :pointer, :ulong, :ulong],
+        :ulong
+
+      attach_function :BCryptDuplicateKey,
+        [:pointer, :pointer, :pointer, :ulong, :ulong],
+        :ulong
+
+      attach_function :BCryptEncrypt,
+        [:pointer, :pointer, :ulong, :pointer, :pointer, :ulong, :pointer, :ulong, :ulong, :ulong],
+        :ulong
+
+      attach_function :BCryptExportKey,
+        [:pointer, :pointer, :string, :pointer, :ulong, :ulong, :ulong],
+        :ulong
+
+      attach_function :BCryptFinalizeKeyPair, [:pointer, :ulong], :ulong
+      attach_function :BCryptFinishHash, [:pointer, :pointer, :ulong, :ulong], :ulong
+      attach_function :BCryptFreeBuffer, [:pointer], :void
+      attach_function :BCryptGenerateKeyPair, [:pointer, :pointer, :ulong, :ulong], :ulong
+
+      attach_function :BCryptGenerateSymmetricKey,
+        [:pointer, :pointer, :pointer, :ulong, :pointer, :ulong, :ulong],
+        :ulong
+
+      attach_function :BCryptGenRandom, [:pointer, :pointer, :ulong, :ulong], :ulong
+
+      attach_function :BCryptGetProperty,
+        [:pointer, :string, :pointer, :ulong, :pointer, :ulong],
+        :ulong
+
+      attach_function, :BCryptHashData, [:pointer, :pointer, :ulong, :ulong], :ulong
+
+      attach_function :BCryptOpenAlgorithmProvider,
+        [:pointer, :string, :string, :ulong],
+        :ulong
     end
   end
 end
