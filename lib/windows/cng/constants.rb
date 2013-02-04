@@ -1,6 +1,13 @@
 module Windows
   module CNG
     module Constants
+      # NTSTATUS values
+      STATUS_SUCCESS                = 0x00000000
+      STATUS_SEVERITY_SUCCESS       = 0x00000000
+      STATUS_SEVERITY_INFORMATIONAL = 0x00000001
+      STATUS_SEVERITY_WARNING       = 0x00000002
+      STATUS_SEVERITY_ERROR         = 0x00000003
+
       # CNG Algorithm Identifiers
       BCRYPT_3DES_ALGORITHM               = "3DES"
       BCRYPT_3DES_112_ALGORITHM           = "3DES_112"
