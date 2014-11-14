@@ -88,7 +88,7 @@ module Windows
     attach_function :BCryptGenRandom, [:pointer, :pointer, :ulong, :ulong], :ulong
 
     attach_function :BCryptGetProperty,
-      [:pointer, :string, :pointer, :ulong, :pointer, :ulong],
+      [:pointer, :buffer_in, :pointer, :ulong, :pointer, :ulong],
       :ulong
 
     attach_function :BCryptHashData, [:pointer, :pointer, :ulong, :ulong], :ulong
