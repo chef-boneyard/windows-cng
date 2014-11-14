@@ -1,6 +1,18 @@
 require 'ffi'
 
 module Windows
+  module MiscFunctions
+    extend FFI::Library
+    ffi_lib :kernel32
+
+    typedef :uintptr_t, :handle
+    typedef :ulong, :dword
+
+    attach_function :HeapAlloc, [:handle, :dword, :size_t], :pointer
+    attach_function :HeapFree, [:handle, :dword, :pointer], :bool
+    attach_function :GetProcessHeap, [], :handle
+  end
+
   module SSLProviderFunctions
   end
 
@@ -102,7 +114,7 @@ module Windows
       :ulong
 
     attach_function :BCryptOpenAlgorithmProvider,
-      [:pointer, :string, :string, :ulong],
+      [:pointer, :buffer_in, :buffer_in, :ulong],
       :ulong
 
     attach_function :BCryptSecretAgreement,
