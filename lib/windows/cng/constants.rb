@@ -41,5 +41,8 @@ module Windows
     BCRYPT_SP800108_CTR_HMAC_ALGORITHM  = "SP800_108_CTR_HMAC"
     BCRYPT_SP80056A_CONCAT_ALGORITHM    = "SP800_56A_CONCAT"
     BCRYPT_PBKDF2_ALGORITHM             = "PBKDF2"
+
+    # Primitive Property Identifiers
+    BCRYPT_OBJECT_LENGTH = "ObjectLength"
   end
 end
