@@ -42,7 +42,14 @@ module Windows
     BCRYPT_SP80056A_CONCAT_ALGORITHM    = "SP800_56A_CONCAT"
     BCRYPT_PBKDF2_ALGORITHM             = "PBKDF2"
 
-    # Primitive Property Identifiers
-    BCRYPT_OBJECT_LENGTH = "ObjectLength"
+    # Primitive Property Identifiers. Encode as necessary.
+    BCRYPT_ALGORITHM_NAME     = "AlgorithmName"
+    BCRYPT_AUTH_TAG_LENGTH    = "AuthTagLength"
+    BCRYPT_BLOCK_LENGTH       = "BlockLength"
+    BCRYPT_OBJECT_LENGTH      = "ObjectLength"
+    BCRYPT_BLOCK_SIZE_LIST    = "BlockSizeList"
+    BCRYPT_CHAINING_MODE      = "ChainingMode"
+    BCRYPT_HASH_BLOCK_LENGTH  = "HashBlockLength"
+    BCRYPT_HASH_LENGTH        = "HashDigestLength"
   end
 end
