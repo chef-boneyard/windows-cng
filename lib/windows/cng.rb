@@ -11,50 +11,127 @@ module Windows
     include Windows::CNGStructs
     include Windows::CNGHelper
 
+    # Creates and returns a new Windows::CNG object.
+    #
+    # The +algorithm+ argument specifies the type of algorithm to use for the
+    # various crypto methods. The default is SHA256.
+    #
+    # The +implementation+ identifies the specific provider to load. This is
+    # the registered alias of the cryptographic primitive provider. By default
+    # this is nil.
+    #
+    # The flags argument can be one or more of the following values:
+    #
+    # * BCRYPT_ALG_HANDLE_HMAC_FLAG
+    # * BCRYPT_PROV_DISPATCH
+    # * BCRYPT_HASH_REUSABLE_FLAG
+    #
+    # See the MSDN documentation for details of what each flag does.
+    #
     def initialize(algorithm = BCRYPT_SHA256_ALGORITHM, implementation = nil, flags = 0)
       @algorithm = algorithm.wincode
       @implementation = implementation ? implementation.wincode : implementation
       @flags = flags
 
-      @handle = FFI::MemoryPointer.new(:uintptr_t)
+      @handle = FFI::MemoryPointer.new(:void)
 
-      if BCryptOpenAlgorithmProvider(@handle, @algorithm, @implementation, @flags) < 0
-        raise SystemCallError.new('BCryptOpenAlgorithmProvider', FFI.errno)
+      status = BCryptOpenAlgorithmProvider(
+        @handle,
+        @algorithm,
+        @implementation,
+        @flags
+      )
+
+      if status != 0
+        raise SystemCallError.new('BCryptOpenAlgorithmProvider', status)
       end
+
+      ObjectSpace.define_finalizer(self, self.class.finalize(@handle))
     end
 
     def hash(data)
-      hash = FFI::MemoryPointer.new(:ulong)
-      result = FFI::MemoryPointer.new(:ulong)
+      pboutput = FFI::MemoryPointer.new(:ulong)
+      pbresult = FFI::MemoryPointer.new(:ulong)
 
       status = BCryptGetProperty(
         @handle,
         BCRYPT_OBJECT_LENGTH.wincode,
-        hash,
-        hash.size,
-        result,
+        pboutput,
+        pboutput.size,
+        pbresult,
         0
       )
 
-      if status < 0
+      if status != 0
+        p status
+        p pbresult.read_ulong
         raise SystemCallError.new('BCryptGetProperty', status)
       end
 
+=begin
       pbhash_object = HeapAlloc(GetProcessHeap(), 0, hash.read_ulong)
 
       if pbhash_object.null?
         raise SystemCallError.new('HeapAlloc', FFI.errno)
       end
 
+      status = BCryptGetProperty(
+        @handle,
+        BCRYPT_HASH_LENGTH.wincode,
+        hash,
+        hash.size,
+        result,
+        0
+      )
+
+      hhash = FFI::MemoryPointer.new(:uintptr_t)
+      pbhash = FFI::MemoryPointer.new(:uchar)
+
+      status = BCryptCreateHash(
+        @handle,
+        hhash,
+        pbhash,
+        pbhash.size,
+        nil,
+        0,
+        0
+      )
+
+      if status < 0
+        raise SystemCallError.new('BCryptCreateHash', status)
+      end
+
+      if BCryptHashData(hhash, data, data.size, 0) < 0
+        raise SystemCallError.new('BCryptHashData', status)
+      end
+
+      if BCryptFinishHash(hhash, pbhash, pbhash.size, 0) < 0
+        raise SystemCallError.new('BCryptFinishHash', status)
+      end
+
       if pbhash_object && !pbhash_object.null?
         HeapFree(GetProcessHeap(), 0, pbhash_object)
       end
+
+      p hhash
+=end
     end
 
     def close
-      if BCryptCloseAlgorithmProvider(@handle, 0) < 0
-        raise SystemCallError.new('BCryptCloseAlgorithmProvider', FFI.errno)
+      status = BCryptCloseAlgorithmProvider(@handle, 0)
+
+      if status != 0
+        raise SystemCallError.new('BCryptCloseAlgorithmProvider', status)
       end
+    end
+
+    private
+
+    # Automatically close crypto object when it goes out of scope.
+    #
+    def self.finalize(handle)
+      puts "Finalized"
+      proc{ BCryptCloseAlgorithmProvider(handle, 0) }
     end
   end
 end
