@@ -50,7 +50,7 @@ module Windows
     end
 
     def hash(data)
-      pboutput = FFI::MemoryPointer.new(:ulong)
+      pboutput = FFI::MemoryPointer.new(:uchar)
       pbresult = FFI::MemoryPointer.new(:ulong)
 
       status = BCryptGetProperty(
@@ -130,7 +130,6 @@ module Windows
     # Automatically close crypto object when it goes out of scope.
     #
     def self.finalize(handle)
-      puts "Finalized"
       proc{ BCryptCloseAlgorithmProvider(handle, 0) }
     end
   end
