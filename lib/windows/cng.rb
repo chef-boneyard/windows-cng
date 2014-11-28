@@ -91,7 +91,8 @@ module Windows
           raise SystemCallError.new('BCryptGetProperty', status)
         end
 
-        pbhash = HeapAlloc(GetProcessHeap(), 0, cbhash.read_ulong)
+        cbhash = cbhash.read_ulong
+        pbhash = HeapAlloc(GetProcessHeap(), 0, cbhash)
 
         if pbhash.null?
           raise SystemCallError.new('HeapAlloc', FFI.errno)
@@ -121,14 +122,19 @@ module Windows
           raise SystemCallError.new('BCryptHashData', status)
         end
 
-        status = BCryptFinishHash(hhash, pbhash, pbhash.size, 0)
+        status = BCryptFinishHash(hhash, pbhash, cbhash, 0)
 
         if status != 0
           raise SystemCallError.new('BCryptFinishHash', status)
         end
       ensure
-        HeapFree(GetProcessHeap(), 0, pbhash_object)
-        HeapFree(GetProcessHeap(), 0, pbhash)
+        if pbhash_object && !pbhash_object.null?
+          HeapFree(GetProcessHeap(), 0, pbhash_object)
+        end
+
+        if pbhash && !pbhash.null?
+          HeapFree(GetProcessHeap(), 0, pbhash)
+        end
       end
     end
 
