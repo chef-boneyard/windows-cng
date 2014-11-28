@@ -1,1 +1,30 @@
-An interface for the Windows Next Generation Cryptography library.
+= Description
+  An interface for the Windows Next Generation Cryptography library.
+
+= Installation
+  gem install windows-cng
+
+= Synopsis
+  cng = Windows::CNG.new
+  cng.hash('some string')
+  cng.close
+
+= License
+  Artistic 2.0
+
+= Contributions
+  Although this library is free, please consider having your company
+  setup a gittip if used by your company professionally.
+
+  http://www.gittip.com/djberg96/
+    
+= Copyright
+  (C) 2014 Daniel J. Berger, All Rights Reserved
+    
+= Warranty
+  This package is provided "as is" and without any express or
+  implied warranties, including, without limitation, the implied
+  warranties of merchantability and fitness for a particular purpose.
+    
+= Author
+  Daniel J. Berger
