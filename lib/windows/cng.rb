@@ -127,6 +127,8 @@ module Windows
         if status != 0
           raise SystemCallError.new('BCryptFinishHash', status)
         end
+
+        pbhash.read_bytes(cbhash)
       ensure
         if pbhash_object && !pbhash_object.null?
           HeapFree(GetProcessHeap(), 0, pbhash_object)
@@ -159,6 +161,6 @@ end
 if $0 == __FILE__
   include Windows
   cng = CNG.new
-  cng.hash("stuff")
+  p cng.hash("stuff")
   cng.close
 end
