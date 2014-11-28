@@ -1,0 +1,8 @@
+* CHANGES
+* Rakefile
+* README
+* windows-cng.gemspec
+* lib/windows/cng.rb
+* lib/windows/cng/constants.rb
+* lib/windows/cng/functions.rb
+* lib/windows/cng/structs.rb
