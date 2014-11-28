@@ -52,15 +52,15 @@ module Windows
     end
 
     def hash(data)
-      pboutput = FFI::MemoryPointer.new(:ulong)
-      pbresult = FFI::MemoryPointer.new(:ulong)
+      cbhash_object = FFI::MemoryPointer.new(:ulong)
+      cbdata = FFI::MemoryPointer.new(:ulong)
 
       status = BCryptGetProperty(
         @handle,
         BCRYPT_OBJECT_LENGTH.wincode,
-        pboutput,
-        pboutput.size,
-        pbresult,
+        cbhash_object,
+        cbhash_object.size,
+        cbdata,
         0
       )
 
@@ -68,53 +68,68 @@ module Windows
         raise SystemCallError.new('BCryptGetProperty', status)
       end
 
-=begin
-      pbhash_object = HeapAlloc(GetProcessHeap(), 0, hash.read_ulong)
+      begin
+        pbhash_object = HeapAlloc(GetProcessHeap(), 0, cbhash_object.read_ulong)
 
-      if pbhash_object.null?
-        raise SystemCallError.new('HeapAlloc', FFI.errno)
-      end
+        if pbhash_object.null?
+          raise SystemCallError.new('HeapAlloc', FFI.errno)
+        end
 
-      status = BCryptGetProperty(
-        @handle,
-        BCRYPT_HASH_LENGTH.wincode,
-        hash,
-        hash.size,
-        result,
-        0
-      )
+        cbhash = FFI::MemoryPointer.new(:ulong)
+        cbdata.clear
 
-      hhash = FFI::MemoryPointer.new(:uintptr_t)
-      pbhash = FFI::MemoryPointer.new(:uchar)
+        status = BCryptGetProperty(
+          @handle,
+          BCRYPT_HASH_LENGTH.wincode,
+          cbhash,
+          cbhash.size,
+          cbdata,
+          0
+        )
 
-      status = BCryptCreateHash(
-        @handle,
-        hhash,
-        pbhash,
-        pbhash.size,
-        nil,
-        0,
-        0
-      )
+        if status != 0
+          raise SystemCallError.new('BCryptGetProperty', status)
+        end
 
-      if status < 0
-        raise SystemCallError.new('BCryptCreateHash', status)
-      end
+        pbhash = HeapAlloc(GetProcessHeap(), 0, cbhash.read_ulong)
 
-      if BCryptHashData(hhash, data, data.size, 0) < 0
-        raise SystemCallError.new('BCryptHashData', status)
-      end
+        if pbhash.null?
+          raise SystemCallError.new('HeapAlloc', FFI.errno)
+        end
 
-      if BCryptFinishHash(hhash, pbhash, pbhash.size, 0) < 0
-        raise SystemCallError.new('BCryptFinishHash', status)
-      end
+        hhash = FFI::MemoryPointer.new(:uintptr_t)
 
-      if pbhash_object && !pbhash_object.null?
+        status = BCryptCreateHash(
+          @handle,
+          hhash,
+          pbhash_object,
+          cbhash_object.read_ulong,
+          nil,
+          0,
+          0
+        )
+
+        if status != 0
+          raise SystemCallError.new('BCryptCreateHash', status)
+        end
+
+        status = BCryptHashData(hhash, data, data.size, 0)
+
+        if status != 0
+          raise SystemCallError.new('BCryptHashData', status)
+        end
+
+        status = BCryptFinishHash(hhash, pbhash, pbhash.size, 0)
+
+        if status != 0
+          raise SystemCallError.new('BCryptFinishHash', status)
+        end
+      ensure
         HeapFree(GetProcessHeap(), 0, pbhash_object)
+        HeapFree(GetProcessHeap(), 0, pbhash)
       end
 
       p hhash
-=end
     end
 
     def close
