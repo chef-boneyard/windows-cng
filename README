@@ -5,6 +5,8 @@
   gem install windows-cng
 
 = Synopsis
+  require 'windows/cng'
+
   cng = Windows::CNG.new
   cng.hash('some string')
   cng.close
