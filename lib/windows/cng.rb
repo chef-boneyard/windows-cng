@@ -11,6 +11,9 @@ module Windows
     include Windows::CNGStructs
     include Windows::CNGHelper
 
+    # The version of the windows-cng library.
+    VERSION = '0.0.1'
+
     # Creates and returns a new Windows::CNG object.
     #
     # The +algorithm+ argument specifies the type of algorithm to use for the
@@ -51,6 +54,8 @@ module Windows
       ObjectSpace.define_finalizer(self, self.class.finalize(@handle))
     end
 
+    # Returns a hash of +data+ using the algorithm used in the constructor.
+    #
     def hash(data)
       cbhash_object = FFI::MemoryPointer.new(:ulong)
       cbdata = FFI::MemoryPointer.new(:ulong)
@@ -140,6 +145,10 @@ module Windows
       end
     end
 
+    # Closes the windows-cng object. This is not explicitly required, since
+    # it will automatically be called once your object goes out of scope, but
+    # it is good form.
+    #
     def close
       status = BCryptCloseAlgorithmProvider(@handle, 0)
 
@@ -156,11 +165,4 @@ module Windows
       proc{ BCryptCloseAlgorithmProvider(handle, 0) }
     end
   end
-end
-
-if $0 == __FILE__
-  include Windows
-  cng = CNG.new
-  p cng.hash("stuff")
-  cng.close
 end
