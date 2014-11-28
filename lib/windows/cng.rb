@@ -97,11 +97,11 @@ module Windows
           raise SystemCallError.new('HeapAlloc', FFI.errno)
         end
 
-        hhash = FFI::MemoryPointer.new(:uintptr_t)
+        ptr = FFI::MemoryPointer.new(:pointer)
 
         status = BCryptCreateHash(
           @handle,
-          hhash,
+          ptr,
           pbhash_object,
           cbhash_object.read_ulong,
           nil,
@@ -112,6 +112,8 @@ module Windows
         if status != 0
           raise SystemCallError.new('BCryptCreateHash', status)
         end
+
+        hhash = ptr.read_pointer
 
         status = BCryptHashData(hhash, data, data.size, 0)
 
@@ -128,8 +130,6 @@ module Windows
         HeapFree(GetProcessHeap(), 0, pbhash_object)
         HeapFree(GetProcessHeap(), 0, pbhash)
       end
-
-      p hhash
     end
 
     def close
