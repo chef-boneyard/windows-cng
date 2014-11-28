@@ -33,10 +33,10 @@ module Windows
       @implementation = implementation ? implementation.wincode : implementation
       @flags = flags
 
-      @handle = FFI::MemoryPointer.new(:void)
+      ptr = FFI::MemoryPointer.new(:pointer)
 
       status = BCryptOpenAlgorithmProvider(
-        @handle,
+        ptr,
         @algorithm,
         @implementation,
         @flags
@@ -46,11 +46,13 @@ module Windows
         raise SystemCallError.new('BCryptOpenAlgorithmProvider', status)
       end
 
+      @handle = ptr.read_pointer
+
       ObjectSpace.define_finalizer(self, self.class.finalize(@handle))
     end
 
     def hash(data)
-      pboutput = FFI::MemoryPointer.new(:uchar)
+      pboutput = FFI::MemoryPointer.new(:ulong)
       pbresult = FFI::MemoryPointer.new(:ulong)
 
       status = BCryptGetProperty(
@@ -63,8 +65,6 @@ module Windows
       )
 
       if status != 0
-        p status
-        p pbresult.read_ulong
         raise SystemCallError.new('BCryptGetProperty', status)
       end
 
