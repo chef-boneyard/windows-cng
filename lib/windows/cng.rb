@@ -54,6 +54,36 @@ module Windows
       ObjectSpace.define_finalizer(self, self.class.finalize(@handle))
     end
 
+    def encrypt(data)
+      cbkey_object = FFI::MemoryPointer.new(:ulong)
+      cbdata = FFI::MemoryPointer.new(:ulong)
+
+      status = BCryptGetProperty(
+        @handle,
+        BCRYPT_OBJECT_LENGTH.wincode,
+        cbkey_object,
+        cbkey_object.size,
+        cbdata,
+        0
+      )
+
+      if status != 0
+        raise SystemCallError.new('BCryptGetProperty', status)
+      end
+
+      begin
+        pbkey_object = HeapAlloc(GetProcessHeap(), 0, cbkey_object.read_ulong)
+
+        if pbkey_object.null?
+          raise SystemCallError.new('HeapAlloc', FFI.errno)
+        end
+      ensure
+        if pbkey_object && !pbkey_object.null?
+          HeapFree(GetProcessHeap(), 0, pbkey_object)
+        end
+      end
+    end
+
     # Returns a hash of +data+ using the algorithm used in the constructor.
     #
     def hash(data)
